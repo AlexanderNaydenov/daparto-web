@@ -76,7 +76,6 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
             url
             width
             height
-            altText
           }
         }
         ... on ZitatBaustein {

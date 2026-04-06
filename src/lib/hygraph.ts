@@ -36,12 +36,16 @@ export async function hygraphFetch<T>(
     const json = (await res.json()) as HygraphResponse<T>;
 
     if (!res.ok) {
+      const msg =
+        "errors" in json && Array.isArray(json.errors) && json.errors[0]?.message
+          ? json.errors[0].message
+          : `Hygraph HTTP ${res.status}: ${JSON.stringify(json)}`;
+      return { errors: [{ message: msg }] };
+    }
+
+    if ("errors" in json && json.errors?.length && json.data == null) {
       return {
-        errors: [
-          {
-            message: `Hygraph HTTP ${res.status}: ${JSON.stringify(json)}`,
-          },
-        ],
+        errors: json.errors,
       };
     }
 

@@ -182,7 +182,7 @@ export function ModularSections({
             const text =
               (block.fliessText as { text?: string } | undefined)?.text ?? "";
             const img = block.abbildung as
-              | { url: string; width?: number; height?: number; altText?: string }
+              | { url: string; width?: number; height?: number }
               | null
               | undefined;
             const imageLeft = align === "LINKS";
@@ -197,7 +197,7 @@ export function ModularSections({
                     <div className="relative aspect-[4/3] flex-1 overflow-hidden rounded-2xl bg-neutral-100">
                       <Image
                         src={img.url}
-                        alt={img.altText ?? title ?? "Abschnittsbild"}
+                        alt={title ?? "Abschnittsbild"}
                         fill
                         className="object-cover"
                         sizes="(max-width: 1024px) 100vw, 50vw"
