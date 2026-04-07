@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { previewEntryField, previewGalerieEintragField } from "@/lib/hygraph-preview-attrs";
 
 export type GalerieEintrag = {
+  id?: string;
   bezeichnung: string;
   linkUrl?: string | null;
   logo?: { url: string; width?: number | null; height?: number | null } | null;
@@ -21,15 +23,28 @@ function sortGalerien(rows: GalerieRow[]): GalerieRow[] {
   return ORDER.map((k) => map.get(k)).filter(Boolean) as GalerieRow[];
 }
 
-function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
+function LogoCell({
+  eintrag,
+  galerieId,
+}: {
+  eintrag: GalerieEintrag;
+  galerieId: string;
+}) {
   const img = eintrag.logo;
   const href = eintrag.linkUrl?.trim();
   const showLink = href && href !== "#";
+  const eintragId = eintrag.id;
+  const logoAttrs =
+    eintragId && galerieId ? previewGalerieEintragField(galerieId, eintragId, "logo") : {};
+  const nameAttrs =
+    eintragId && galerieId ? previewGalerieEintragField(galerieId, eintragId, "bezeichnung") : {};
+  const linkAttrs =
+    eintragId && galerieId ? previewGalerieEintragField(galerieId, eintragId, "linkUrl") : {};
 
   const inner = (
     <div className="flex h-[15rem] w-full min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--brand-primary)]/10 bg-white px-4 py-3 shadow-sm transition hover:border-[var(--brand-accent)]/40 hover:shadow-md sm:h-[18rem]">
       {img?.url ? (
-        <div className="relative h-36 w-full sm:h-[10.5rem]">
+        <div className="relative h-36 w-full sm:h-[10.5rem]" {...logoAttrs}>
           <Image
             src={img.url}
             alt={eintrag.bezeichnung}
@@ -40,11 +55,17 @@ function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
           />
         </div>
       ) : (
-        <span className="text-center text-sm font-medium text-[var(--brand-ink-muted)] sm:text-base">
+        <span
+          className="text-center text-sm font-medium text-[var(--brand-ink-muted)] sm:text-base"
+          {...nameAttrs}
+        >
           {eintrag.bezeichnung}
         </span>
       )}
-      <span className="mt-2 line-clamp-1 text-center text-xs font-medium text-[var(--brand-ink-muted)] sm:text-sm">
+      <span
+        className="mt-2 line-clamp-1 text-center text-xs font-medium text-[var(--brand-ink-muted)] sm:text-sm"
+        {...(img?.url ? nameAttrs : {})}
+      >
         {eintrag.bezeichnung}
       </span>
     </div>
@@ -52,7 +73,7 @@ function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
 
   if (showLink) {
     return (
-      <Link href={href} className="block shrink-0">
+      <Link href={href} className="block shrink-0" {...linkAttrs}>
         {inner}
       </Link>
     );
@@ -74,12 +95,15 @@ export function HomepageGalerien({ galerien }: { galerien: GalerieRow[] | null |
         <div className="mt-10 space-y-12">
           {rows.map((row) => (
             <div key={row.id}>
-              <h2 className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold tracking-tight text-[var(--brand-primary)] sm:text-2xl">
+              <h2
+                className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold tracking-tight text-[var(--brand-primary)] sm:text-2xl"
+                {...previewEntryField(row.id, "titel")}
+              >
                 {row.titel}
               </h2>
               <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {(row.eintraege ?? []).map((e, i) => (
-                  <LogoCell key={`${row.id}-${e.bezeichnung}-${i}`} eintrag={e} />
+                  <LogoCell key={`${row.id}-${e.bezeichnung}-${i}`} eintrag={e} galerieId={row.id} />
                 ))}
               </div>
             </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 
 export type CategoryTileData = {
   id: string;
@@ -8,16 +9,23 @@ export type CategoryTileData = {
 };
 
 export function CategoryTile({ category }: { category: CategoryTileData }) {
+  const nameAttrs = previewEntryField(category.id, "name");
+  const kurzAttrs = previewEntryField(category.id, "kurzbeschreibung");
   return (
     <Link
       href={`/kategorie/${category.urlSlug}`}
       className="group flex flex-col rounded-2xl border border-black/5 bg-white p-5 shadow-sm transition hover:border-[var(--brand-orange)]/40 hover:shadow-md"
     >
-      <span className="font-[family-name:var(--font-barlow-condensed)] text-lg font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]">
+      <span
+        className="font-[family-name:var(--font-barlow-condensed)] text-lg font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]"
+        {...nameAttrs}
+      >
         {category.name}
       </span>
       {category.kurzbeschreibung ? (
-        <p className="mt-2 line-clamp-2 text-sm text-[var(--brand-ink-muted)]">{category.kurzbeschreibung}</p>
+        <p className="mt-2 line-clamp-2 text-sm text-[var(--brand-ink-muted)]" {...kurzAttrs}>
+          {category.kurzbeschreibung}
+        </p>
       ) : (
         <p className="mt-2 text-sm text-[var(--brand-ink-muted)]">Ersatzteile & passendes Zubehör entdecken.</p>
       )}

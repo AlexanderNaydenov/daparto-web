@@ -5,6 +5,7 @@ import { ModularSections } from "@/components/modular-sections";
 import { ProductCard } from "@/components/product-card";
 import { SearchHero } from "@/components/search-hero";
 import { hygraphFetch } from "@/lib/hygraph";
+import { previewModularField } from "@/lib/hygraph-preview-attrs";
 import { HOME_PAGE_QUERY } from "@/lib/queries";
 import type { Metadata } from "next";
 
@@ -12,6 +13,7 @@ export const revalidate = 60;
 
 type HeldSektion = {
   __typename: "HeldSektion";
+  id?: string;
   heldTitel: string;
   untertitel?: string | null;
   primaererAufruf?: { buttonBeschriftung: string; zielUrl: string } | null;
@@ -65,6 +67,10 @@ export default async function Home() {
   const sections = page?.modulareSektionen as Record<string, unknown>[] | undefined;
   const held = sections?.find((b) => b.__typename === "HeldSektion") as HeldSektion | undefined;
   const siteTitle = page?.titel ?? "Ersatzteile vergleichen";
+  const sid = page?.id;
+  const hid = held?.id;
+  const heroTitleAttrs = sid && hid ? previewModularField(sid, hid, "ueberschrift") : undefined;
+  const heroSubtitleAttrs = sid && hid ? previewModularField(sid, hid, "untertitel") : undefined;
 
   return (
     <>
@@ -74,6 +80,8 @@ export default async function Home() {
           held?.untertitel ??
           "Finden Sie passende Komponenten für Ihr Fahrzeug — mit klaren Kategorien und vergleichbaren Angeboten."
         }
+        previewTitleAttrs={heroTitleAttrs}
+        previewSubtitleAttrs={heroSubtitleAttrs}
         primaryCta={
           held?.primaererAufruf
             ? {
@@ -92,7 +100,7 @@ export default async function Home() {
         }
       />
 
-      <ModularSections sections={sections} />
+      <ModularSections sections={sections} startseiteId={page?.id} />
 
       <HomepageGalerien galerien={page?.galerien} />
 

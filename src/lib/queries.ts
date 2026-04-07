@@ -22,6 +22,7 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
       modulareSektionen {
         __typename
         ... on HeldSektion {
+          id
           heldTitel: ueberschrift
           untertitel
           primaererAufruf {
@@ -34,25 +35,31 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
           }
         }
         ... on TeaserRaster {
+          id
           teaserTitel: ueberschrift
           untertitel
           karten {
+            id
             titel
             kurzbeschreibung
             linkUrl
           }
         }
         ... on KennzahlenLeiste {
+          id
           kennTitel: ueberschrift
           kennzahlen {
+            id
             zahlText
             beschreibung
           }
         }
         ... on LogoLeiste {
+          id
           logoTitel: ueberschrift
         }
         ... on FreitextSektion {
+          id
           abschnittsUeberschrift
           inhalt {
             text
@@ -60,15 +67,19 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
           }
         }
         ... on MerkmalBlock {
+          id
           blockUeberschrift
           zeilen {
+            id
             bezeichnung
             wert
           }
         }
         ... on FaqBlock {
+          id
           faqTitel: ueberschrift
           eintraege {
+            id
             frage
             antwort {
               text
@@ -77,6 +88,7 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
           }
         }
         ... on BildMitText {
+          id
           bmtTitel: ueberschrift
           bildAusrichtung
           fliessText {
@@ -90,6 +102,7 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
           }
         }
         ... on ZitatBaustein {
+          id
           zitatText {
             text
             markdown
@@ -102,6 +115,7 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
         titel
         kategorie
         eintraege {
+          id
           bezeichnung
           linkUrl
           logo {

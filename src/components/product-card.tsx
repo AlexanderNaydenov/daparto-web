@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 
 export type ProductCardData = {
   id: string;
@@ -14,6 +15,8 @@ export type ProductCardData = {
 
 export function ProductCard({ product }: { product: ProductCardData }) {
   const img = product.produktbilder?.[0];
+  const titelAttrs = previewEntryField(product.id, "titel");
+  const kurzAttrs = previewEntryField(product.id, "kurzbeschreibung");
   return (
     <Link
       href={`/produkt/${product.urlSlug}`}
@@ -46,11 +49,16 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           ) : null}
           {product.kategorie?.name ? <span>{product.kategorie.name}</span> : null}
         </div>
-        <h3 className="mt-2 line-clamp-2 font-[family-name:var(--font-barlow-condensed)] text-lg font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]">
+        <h3
+          className="mt-2 line-clamp-2 font-[family-name:var(--font-barlow-condensed)] text-lg font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]"
+          {...titelAttrs}
+        >
           {product.titel}
         </h3>
         {product.kurzbeschreibung ? (
-          <p className="mt-1 line-clamp-2 text-sm text-[var(--brand-ink-muted)]">{product.kurzbeschreibung}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-[var(--brand-ink-muted)]" {...kurzAttrs}>
+            {product.kurzbeschreibung}
+          </p>
         ) : null}
         <span className="mt-auto pt-4 text-sm font-semibold text-[var(--brand-orange)]">
           Zum Produkt →

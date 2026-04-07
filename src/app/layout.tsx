@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DraftModeBanner } from "@/components/draft-mode-banner";
+import { PreviewWrapper } from "@/components/preview-wrapper";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteTopBanner } from "@/components/site-top-banner";
@@ -46,7 +47,9 @@ export default function RootLayout({
         <DraftModeBanner />
         <SiteTopBanner />
         <SiteHeader />
-        <div className="flex-1">{children}</div>
+        <div className="flex-1">
+          <PreviewWrapper>{children}</PreviewWrapper>
+        </div>
         <SiteFooter />
       </body>
     </html>

@@ -1,5 +1,6 @@
 import { CmsErrorBanner } from "@/components/cms-error-banner";
 import { hygraphFetch } from "@/lib/hygraph";
+import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 import { PRODUCT_BY_SLUG } from "@/lib/queries";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -59,6 +60,11 @@ export default async function ProduktPage({
   if (!p) notFound();
 
   const body = p.vollbeschreibung?.text?.split("\n").filter(Boolean) ?? [];
+  const titelAttrs = previewEntryField(p.id, "titel");
+  const kurzAttrs = previewEntryField(p.id, "kurzbeschreibung");
+  const vollAttrs = previewEntryField(p.id, "vollbeschreibung");
+  const refAttrs = previewEntryField(p.id, "herstellerReferenz");
+  const bildAttrs = previewEntryField(p.id, "produktbilder");
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -88,7 +94,7 @@ export default async function ProduktPage({
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:items-start">
         <div className="space-y-4">
           {p.produktbilder?.[0]?.url ? (
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100" {...bildAttrs}>
               <Image
                 src={p.produktbilder[0].url}
                 alt={p.titel}
@@ -123,14 +129,19 @@ export default async function ProduktPage({
               </span>
             ) : null}
           </div>
-          <h1 className="mt-3 font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold text-[var(--brand-ink)]">
+          <h1
+            className="mt-3 font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold text-[var(--brand-ink)]"
+            {...titelAttrs}
+          >
             {p.titel}
           </h1>
           {p.kurzbeschreibung ? (
-            <p className="mt-4 text-lg text-[var(--brand-ink-muted)]">{p.kurzbeschreibung}</p>
+            <p className="mt-4 text-lg text-[var(--brand-ink-muted)]" {...kurzAttrs}>
+              {p.kurzbeschreibung}
+            </p>
           ) : null}
           {p.herstellerReferenz ? (
-            <p className="mt-4 text-sm text-[var(--brand-ink-muted)]">
+            <p className="mt-4 text-sm text-[var(--brand-ink-muted)]" {...refAttrs}>
               <span className="font-semibold text-[var(--brand-ink)]">Referenz:</span>{" "}
               {p.herstellerReferenz}
             </p>
@@ -139,7 +150,11 @@ export default async function ProduktPage({
       </div>
 
       {body.length > 0 ? (
-        <section className="prose prose-neutral mt-12 max-w-3xl">
+        <section
+          className="prose prose-neutral mt-12 max-w-3xl"
+          {...vollAttrs}
+          data-hygraph-rich-text-format="text"
+        >
           <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)]">
             Beschreibung
           </h2>

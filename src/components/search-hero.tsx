@@ -9,9 +9,19 @@ type Props = {
   subtitle?: string | null;
   primaryCta?: { label: string; href: string } | null;
   secondaryCta?: { label: string; href: string } | null;
+  /** Hygraph Preview SDK — data-hygraph-* for click-to-edit */
+  previewTitleAttrs?: Record<string, string>;
+  previewSubtitleAttrs?: Record<string, string>;
 };
 
-export function SearchHero({ title, subtitle, primaryCta, secondaryCta }: Props) {
+export function SearchHero({
+  title,
+  subtitle,
+  primaryCta,
+  secondaryCta,
+  previewTitleAttrs,
+  previewSubtitleAttrs,
+}: Props) {
   const router = useRouter();
   const [q, setQ] = useState("");
 
@@ -41,11 +51,16 @@ export function SearchHero({ title, subtitle, primaryCta, secondaryCta }: Props)
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--brand-accent)]">
               WE DRIVE PERFORMANCE
             </p>
-            <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            <h1
+              className="mt-4 max-w-3xl font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl"
+              {...(previewTitleAttrs ?? {})}
+            >
               {title}
             </h1>
             {subtitle ? (
-              <p className="mt-4 max-w-2xl text-lg text-white/75">{subtitle}</p>
+              <p className="mt-4 max-w-2xl text-lg text-white/75" {...(previewSubtitleAttrs ?? {})}>
+                {subtitle}
+              </p>
             ) : null}
 
             <form

@@ -1,15 +1,42 @@
 import Image from "next/image";
+import {
+  previewModularField,
+  previewModularNestedField,
+} from "@/lib/hygraph-preview-attrs";
 
-type Section = Record<string, unknown> & { __typename?: string };
+type Section = Record<string, unknown> & { __typename?: string; id?: string };
 
 function proseClass() {
   return "prose prose-neutral max-w-none prose-p:leading-relaxed prose-headings:font-[family-name:var(--font-barlow-condensed)]";
 }
 
+function a(
+  startseiteId: string | undefined,
+  blockId: string | undefined,
+  fieldApiId: string
+): Record<string, string> {
+  if (!startseiteId || !blockId) return {};
+  return previewModularField(startseiteId, blockId, fieldApiId);
+}
+
+function nested(
+  startseiteId: string | undefined,
+  sectionId: string | undefined,
+  childField: string,
+  childId: string | undefined,
+  leafField: string
+): Record<string, string> {
+  if (!startseiteId || !sectionId || !childId) return {};
+  return previewModularNestedField(startseiteId, sectionId, childField, childId, leafField);
+}
+
 export function ModularSections({
   sections,
+  startseiteId,
 }: {
   sections: Section[] | null | undefined;
+  /** Startseite entry id — enables Hygraph click-to-edit on modular blocks */
+  startseiteId?: string;
 }) {
   if (!sections?.length) return null;
 
@@ -23,14 +50,22 @@ export function ModularSections({
             const abs = block.abschnittsUeberschrift as string | undefined;
             const text =
               (block.inhalt as { text?: string } | undefined)?.text ?? "";
+            const bid = block.id as string | undefined;
             return (
               <section key={`ft-${i}`} className="mx-auto max-w-6xl px-4 sm:px-6">
                 {abs ? (
-                  <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                  <h2
+                    className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                    {...a(startseiteId, bid, "abschnittsUeberschrift")}
+                  >
                     {abs}
                   </h2>
                 ) : null}
-                <div className={`${proseClass()} mt-4 text-[var(--brand-ink-muted)]`}>
+                <div
+                  className={`${proseClass()} mt-4 text-[var(--brand-ink-muted)]`}
+                  {...a(startseiteId, bid, "inhalt")}
+                  data-hygraph-rich-text-format="markdown"
+                >
                   <p>{text}</p>
                 </div>
               </section>
@@ -38,24 +73,37 @@ export function ModularSections({
           }
           case "MerkmalBlock": {
             const title = block.blockUeberschrift as string | undefined;
-            const rows = (block.zeilen as { bezeichnung: string; wert: string }[]) ?? [];
+            const rows =
+              (block.zeilen as { id?: string; bezeichnung: string; wert: string }[]) ?? [];
+            const bid = block.id as string | undefined;
             return (
               <section key={`mb-${i}`} className="mx-auto max-w-6xl px-4 sm:px-6">
                 {title ? (
-                  <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                  <h2
+                    className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                    {...a(startseiteId, bid, "blockUeberschrift")}
+                  >
                     {title}
                   </h2>
                 ) : null}
                 <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {rows.map((row) => (
                     <div
-                      key={`${row.bezeichnung}-${row.wert}`}
+                      key={row.id ?? `${row.bezeichnung}-${row.wert}`}
                       className="rounded-2xl border border-black/5 bg-white p-5 shadow-sm"
                     >
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-[var(--brand-ink-muted)]">
+                      <dt
+                        className="text-xs font-semibold uppercase tracking-wide text-[var(--brand-ink-muted)]"
+                        {...nested(startseiteId, bid, "zeilen", row.id, "bezeichnung")}
+                      >
                         {row.bezeichnung}
                       </dt>
-                      <dd className="mt-1 text-lg font-semibold text-[var(--brand-ink)]">{row.wert}</dd>
+                      <dd
+                        className="mt-1 text-lg font-semibold text-[var(--brand-ink)]"
+                        {...nested(startseiteId, bid, "zeilen", row.id, "wert")}
+                      >
+                        {row.wert}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -65,22 +113,39 @@ export function ModularSections({
           case "FaqBlock": {
             const title = block.faqTitel as string | undefined;
             const items =
-              (block.eintraege as { frage: string; antwort?: { text?: string } }[]) ?? [];
+              (block.eintraege as {
+                id?: string;
+                frage: string;
+                antwort?: { text?: string };
+              }[]) ?? [];
+            const bid = block.id as string | undefined;
             return (
               <section key={`faq-${i}`} className="mx-auto max-w-3xl px-4 sm:px-6">
                 {title ? (
-                  <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                  <h2
+                    className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                    {...a(startseiteId, bid, "ueberschrift")}
+                  >
                     {title}
                   </h2>
                 ) : null}
                 <ul className="mt-8 space-y-4">
                   {items.map((item) => (
                     <li
-                      key={item.frage}
+                      key={item.id ?? item.frage}
                       className="rounded-2xl border border-black/5 bg-white p-5 shadow-sm"
                     >
-                      <p className="font-semibold text-[var(--brand-ink)]">{item.frage}</p>
-                      <p className="mt-2 text-sm text-[var(--brand-ink-muted)]">
+                      <p
+                        className="font-semibold text-[var(--brand-ink)]"
+                        {...nested(startseiteId, bid, "eintraege", item.id, "frage")}
+                      >
+                        {item.frage}
+                      </p>
+                      <p
+                        className="mt-2 text-sm text-[var(--brand-ink-muted)]"
+                        {...nested(startseiteId, bid, "eintraege", item.id, "antwort")}
+                        data-hygraph-rich-text-format="text"
+                      >
                         {item.antwort?.text}
                       </p>
                     </li>
@@ -92,7 +157,12 @@ export function ModularSections({
           case "KennzahlenLeiste": {
             const title = block.kennTitel as string | undefined;
             const stats =
-              (block.kennzahlen as { zahlText: string; beschreibung: string }[]) ?? [];
+              (block.kennzahlen as {
+                id?: string;
+                zahlText: string;
+                beschreibung: string;
+              }[]) ?? [];
+            const bid = block.id as string | undefined;
             return (
               <section
                 key={`kn-${i}`}
@@ -100,17 +170,28 @@ export function ModularSections({
               >
                 <div className="mx-auto max-w-6xl px-4 sm:px-6">
                   {title ? (
-                    <h2 className="text-center font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                    <h2
+                      className="text-center font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                      {...a(startseiteId, bid, "ueberschrift")}
+                    >
                       {title}
                     </h2>
                   ) : null}
                   <div className="mt-10 grid gap-8 sm:grid-cols-3">
                     {stats.map((s) => (
-                      <div key={s.beschreibung} className="text-center">
-                        <p className="font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold text-[var(--brand-orange)] sm:text-5xl">
+                      <div key={s.id ?? s.beschreibung} className="text-center">
+                        <p
+                          className="font-[family-name:var(--font-barlow-condensed)] text-4xl font-bold text-[var(--brand-orange)] sm:text-5xl"
+                          {...nested(startseiteId, bid, "kennzahlen", s.id, "zahlText")}
+                        >
                           {s.zahlText}
                         </p>
-                        <p className="mt-2 text-sm text-[var(--brand-ink-muted)]">{s.beschreibung}</p>
+                        <p
+                          className="mt-2 text-sm text-[var(--brand-ink-muted)]"
+                          {...nested(startseiteId, bid, "kennzahlen", s.id, "beschreibung")}
+                        >
+                          {s.beschreibung}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -122,28 +203,48 @@ export function ModularSections({
             const t = block.teaserTitel as string | undefined;
             const sub = block.untertitel as string | undefined;
             const cards =
-              (block.karten as { titel: string; kurzbeschreibung?: string; linkUrl: string }[]) ??
-              [];
+              (block.karten as {
+                id?: string;
+                titel: string;
+                kurzbeschreibung?: string;
+                linkUrl: string;
+              }[]) ?? [];
+            const bid = block.id as string | undefined;
             return (
               <section key={`tr-${i}`} className="mx-auto max-w-6xl px-4 sm:px-6">
                 {t ? (
-                  <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                  <h2
+                    className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                    {...a(startseiteId, bid, "ueberschrift")}
+                  >
                     {t}
                   </h2>
                 ) : null}
-                {sub ? <p className="mt-2 text-[var(--brand-ink-muted)]">{sub}</p> : null}
+                {sub ? (
+                  <p className="mt-2 text-[var(--brand-ink-muted)]" {...a(startseiteId, bid, "untertitel")}>
+                    {sub}
+                  </p>
+                ) : null}
                 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {cards.map((c) => (
                     <a
-                      key={c.linkUrl + c.titel}
+                      key={c.id ?? c.linkUrl + c.titel}
                       href={c.linkUrl}
                       className="group rounded-2xl border border-black/5 bg-white p-6 shadow-sm transition hover:border-[var(--brand-orange)]/40 hover:shadow-md"
                     >
-                      <h3 className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]">
+                      <h3
+                        className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[var(--brand-ink)] group-hover:text-[var(--brand-orange)]"
+                        {...nested(startseiteId, bid, "karten", c.id, "titel")}
+                      >
                         {c.titel}
                       </h3>
                       {c.kurzbeschreibung ? (
-                        <p className="mt-2 text-sm text-[var(--brand-ink-muted)]">{c.kurzbeschreibung}</p>
+                        <p
+                          className="mt-2 text-sm text-[var(--brand-ink-muted)]"
+                          {...nested(startseiteId, bid, "karten", c.id, "kurzbeschreibung")}
+                        >
+                          {c.kurzbeschreibung}
+                        </p>
                       ) : null}
                       <span className="mt-4 inline-flex text-sm font-semibold text-[var(--brand-orange)]">
                         Mehr erfahren →
@@ -156,10 +257,14 @@ export function ModularSections({
           }
           case "LogoLeiste": {
             const t = block.logoTitel as string | undefined;
+            const bid = block.id as string | undefined;
             return (
               <section key={`ll-${i}`} className="mx-auto max-w-6xl px-4 sm:px-6">
                 {t ? (
-                  <p className="text-center text-sm font-semibold uppercase tracking-widest text-[var(--brand-ink-muted)]">
+                  <p
+                    className="text-center text-sm font-semibold uppercase tracking-widest text-[var(--brand-ink-muted)]"
+                    {...a(startseiteId, bid, "ueberschrift")}
+                  >
                     {t}
                   </p>
                 ) : null}
@@ -186,6 +291,7 @@ export function ModularSections({
               | null
               | undefined;
             const imageLeft = align === "LINKS";
+            const bid = block.id as string | undefined;
             return (
               <section key={`bmt-${i}`} className="mx-auto max-w-6xl px-4 sm:px-6">
                 <div
@@ -194,7 +300,10 @@ export function ModularSections({
                   }`}
                 >
                   {img?.url ? (
-                    <div className="relative aspect-[4/3] flex-1 overflow-hidden rounded-2xl bg-neutral-100">
+                    <div
+                      className="relative aspect-[4/3] flex-1 overflow-hidden rounded-2xl bg-neutral-100"
+                      {...a(startseiteId, bid, "abbildung")}
+                    >
                       <Image
                         src={img.url}
                         alt={title ?? "Abschnittsbild"}
@@ -206,11 +315,18 @@ export function ModularSections({
                   ) : null}
                   <div className="flex-1">
                     {title ? (
-                      <h2 className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl">
+                      <h2
+                        className="font-[family-name:var(--font-barlow-condensed)] text-2xl font-bold text-[var(--brand-ink)] sm:text-3xl"
+                        {...a(startseiteId, bid, "ueberschrift")}
+                      >
                         {title}
                       </h2>
                     ) : null}
-                    <div className={`${proseClass()} mt-4 text-[var(--brand-ink-muted)]`}>
+                    <div
+                      className={`${proseClass()} mt-4 text-[var(--brand-ink-muted)]`}
+                      {...a(startseiteId, bid, "fliessText")}
+                      data-hygraph-rich-text-format="markdown"
+                    >
                       <p>{text}</p>
                     </div>
                   </div>
@@ -222,14 +338,24 @@ export function ModularSections({
             const src = block.quellenangabe as string | undefined;
             const quote =
               (block.zitatText as { text?: string } | undefined)?.text ?? "";
+            const bid = block.id as string | undefined;
             return (
               <section key={`zq-${i}`} className="mx-auto max-w-3xl px-4 sm:px-6">
                 <blockquote className="rounded-2xl border-l-4 border-[var(--brand-orange)] bg-[var(--brand-surface)] px-6 py-8">
-                  <p className="font-[family-name:var(--font-barlow-condensed)] text-xl font-semibold italic text-[var(--brand-ink)] sm:text-2xl">
+                  <p
+                    className="font-[family-name:var(--font-barlow-condensed)] text-xl font-semibold italic text-[var(--brand-ink)] sm:text-2xl"
+                    {...a(startseiteId, bid, "zitatText")}
+                    data-hygraph-rich-text-format="text"
+                  >
                     “{quote}”
                   </p>
                   {src ? (
-                    <footer className="mt-4 text-sm text-[var(--brand-ink-muted)]">— {src}</footer>
+                    <footer
+                      className="mt-4 text-sm text-[var(--brand-ink-muted)]"
+                      {...a(startseiteId, bid, "quellenangabe")}
+                    >
+                      — {src}
+                    </footer>
                   ) : null}
                 </blockquote>
               </section>
