@@ -1,8 +1,19 @@
+import { draftMode } from "next/headers";
+
+export const HYGRAPH_CACHE_TAG = "hygraph";
+
 const DEFAULT_REVALIDATE = 60;
 
 export type HygraphResponse<T> =
   | { data: T; errors?: undefined }
   | { data?: T; errors: { message: string }[] };
+
+function resolveToken(isDraft: boolean): string | undefined {
+  if (isDraft) {
+    return process.env.HYGRAPH_PREVIEW_TOKEN ?? process.env.HYGRAPH_API_TOKEN;
+  }
+  return process.env.HYGRAPH_PRODUCTION ?? process.env.HYGRAPH_API_TOKEN;
+}
 
 export async function hygraphFetch<T>(
   query: string,
@@ -16,11 +27,15 @@ export async function hygraphFetch<T>(
     };
   }
 
+  const { isEnabled: isDraft } = await draftMode();
+  const token = resolveToken(isDraft);
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    // Same queries for prod/preview; stage is controlled by header + token permissions.
+    "gcms-stage": isDraft ? "DRAFT" : "PUBLISHED",
   };
 
-  const token = process.env.HYGRAPH_API_TOKEN;
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -30,7 +45,9 @@ export async function hygraphFetch<T>(
       method: "POST",
       headers,
       body: JSON.stringify({ query, variables }),
-      next: { revalidate: revalidateSeconds },
+      ...(isDraft
+        ? { cache: "no-store" }
+        : { next: { revalidate: revalidateSeconds, tags: [HYGRAPH_CACHE_TAG] } }),
     });
 
     const json = (await res.json()) as HygraphResponse<T>;

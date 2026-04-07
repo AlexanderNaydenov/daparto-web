@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { DraftModeBanner } from "@/components/draft-mode-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteTopBanner } from "@/components/site-top-banner";
@@ -42,6 +43,7 @@ export default function RootLayout({
       className={`${barlow.variable} ${barlowCondensed.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-[var(--brand-ink)]">
+        <DraftModeBanner />
         <SiteTopBanner />
         <SiteHeader />
         <div className="flex-1">{children}</div>

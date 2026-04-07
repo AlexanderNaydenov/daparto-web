@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Allow Hygraph Studio Live Preview to embed the site in an iframe.
+  // @see https://hygraph.com/docs/developer-guides/schema/live-preview#csp-or-security-header-issues
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://*.hygraph.com https://hygraph.com https://app.hygraph.com;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
