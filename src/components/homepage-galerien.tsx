@@ -27,7 +27,7 @@ function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
   const showLink = href && href !== "#";
 
   const inner = (
-    <div className="flex h-[15rem] w-full min-w-[21rem] flex-col items-center justify-center rounded-xl border border-[var(--brand-primary)]/10 bg-white px-4 py-3 shadow-sm transition hover:border-[var(--brand-accent)]/40 hover:shadow-md sm:h-[18rem] sm:min-w-[25.5rem]">
+    <div className="flex h-[15rem] w-full min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--brand-primary)]/10 bg-white px-4 py-3 shadow-sm transition hover:border-[var(--brand-accent)]/40 hover:shadow-md sm:h-[18rem]">
       {img?.url ? (
         <div className="relative h-36 w-full sm:h-[10.5rem]">
           <Image
@@ -76,7 +76,7 @@ export function HomepageGalerien({ galerien }: { galerien: GalerieRow[] | null |
               <h2 className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold tracking-tight text-[var(--brand-primary)] sm:text-2xl">
                 {row.titel}
               </h2>
-              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {(row.eintraege ?? []).map((e, i) => (
                   <LogoCell key={`${row.id}-${e.bezeichnung}-${i}`} eintrag={e} />
                 ))}
