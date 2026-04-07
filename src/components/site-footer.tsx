@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -6,10 +7,17 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="font-[family-name:var(--font-barlow-condensed)] text-lg font-bold text-[var(--brand-ink)]">
-              dapa<span className="text-[var(--brand-orange)]">rto</span>
-            </p>
-            <p className="mt-2 text-sm text-[var(--brand-ink-muted)]">
+            <Link href="/" className="inline-block">
+              <Image
+                src="/daparto-logo.svg"
+                alt="Daparto"
+                width={180}
+                height={31}
+                unoptimized
+                className="h-7 w-auto opacity-90"
+              />
+            </Link>
+            <p className="mt-3 text-sm text-[var(--brand-ink-muted)]">
               Vergleichsmarktplatz für Ersatzteile — strukturiert, transparent, schnell.
             </p>
           </div>
@@ -17,12 +25,12 @@ export function SiteFooter() {
             <p className="text-sm font-semibold text-[var(--brand-ink)]">Entdecken</p>
             <ul className="mt-3 space-y-2 text-sm text-[var(--brand-ink-muted)]">
               <li>
-                <Link className="hover:text-[var(--brand-orange)]" href="/kategorien">
+                <Link className="hover:text-[var(--brand-primary)]" href="/kategorien">
                   Kategorien
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[var(--brand-orange)]" href="/ratgeber">
+                <Link className="hover:text-[var(--brand-primary)]" href="/ratgeber">
                   Ratgeber
                 </Link>
               </li>

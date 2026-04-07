@@ -1,3 +1,14 @@
+export const BANNER_QUERY = /* GraphQL */ `
+  query Banner {
+    banners(where: { aktiv: true }, first: 1, orderBy: updatedAt_DESC) {
+      id
+      text
+      linkLabel
+      linkUrl
+    }
+  }
+`;
+
 export const HOME_PAGE_QUERY = /* GraphQL */ `
   query HomePage {
     startseiten(first: 1, orderBy: updatedAt_DESC) {

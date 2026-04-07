@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --brand-orange: #e35205;
-  --brand-orange-dark: #c74704;
-  --brand-ink: #141414;
+  /* Official palette from daparto-logo.svg */
+  --brand-primary: #004874;
+  --brand-accent: #009877;
+  --brand-accent-dark: #007a62;
+  /* Legacy class names map to Daparto teal accent (buttons, links) */
+  --brand-orange: var(--brand-accent);
+  --brand-orange-dark: var(--brand-accent-dark);
+  --brand-ink: #1a1a1a;
   --brand-ink-muted: #5c5c5c;
-  --brand-surface: #f6f6f7;
+  --brand-surface: #eef2f6;
   --background: #ffffff;
   --foreground: var(--brand-ink);
 }
