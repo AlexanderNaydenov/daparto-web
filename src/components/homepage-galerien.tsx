@@ -34,6 +34,7 @@ function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
             src={img.url}
             alt={eintrag.bezeichnung}
             fill
+            unoptimized
             className="object-contain"
             sizes="(max-width: 640px) 85vw, 420px"
           />
