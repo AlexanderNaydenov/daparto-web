@@ -1,5 +1,6 @@
 import { CategoryTile } from "@/components/category-tile";
 import { CmsErrorBanner } from "@/components/cms-error-banner";
+import { HomepageGalerien, type GalerieRow } from "@/components/homepage-galerien";
 import { ModularSections } from "@/components/modular-sections";
 import { ProductCard } from "@/components/product-card";
 import { SearchHero } from "@/components/search-hero";
@@ -24,6 +25,7 @@ type HomeData = {
     urlSlug: string;
     seo?: { metaTitel?: string | null; metaBeschreibung?: string | null } | null;
     modulareSektionen?: Record<string, unknown>[] | null;
+    galerien?: GalerieRow[] | null;
   }[];
   kategorien: {
     id: string;
@@ -91,6 +93,8 @@ export default async function Home() {
       />
 
       <ModularSections sections={sections} />
+
+      <HomepageGalerien galerien={page?.galerien} />
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

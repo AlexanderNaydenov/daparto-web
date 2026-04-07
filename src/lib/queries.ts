@@ -97,6 +97,20 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
           quellenangabe
         }
       }
+      galerien {
+        id
+        titel
+        kategorie
+        eintraege {
+          bezeichnung
+          linkUrl
+          logo {
+            url
+            width
+            height
+          }
+        }
+      }
     }
     kategorien(first: 24, orderBy: name_ASC) {
       id
