@@ -8,11 +8,30 @@ export type HygraphResponse<T> =
   | { data: T; errors?: undefined }
   | { data?: T; errors: { message: string }[] };
 
+/** Non-empty env value (Vercel may define a var as empty string, which would block ?? fallback). */
+function envFirst(...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const v = process.env[key];
+    if (typeof v === "string" && v.trim().length > 0) {
+      return v.trim();
+    }
+  }
+  return undefined;
+}
+
 function resolveToken(isDraft: boolean): string | undefined {
   if (isDraft) {
-    return process.env.HYGRAPH_PREVIEW_TOKEN ?? process.env.HYGRAPH_API_TOKEN;
+    return envFirst("HYGRAPH_PREVIEW_TOKEN", "HYGRAPH_API_TOKEN");
   }
-  return process.env.HYGRAPH_PRODUCTION ?? process.env.HYGRAPH_API_TOKEN;
+  return envFirst("HYGRAPH_PRODUCTION", "HYGRAPH_API_TOKEN");
+}
+
+function notAllowedHint(message: string): string {
+  const m = message.toLowerCase();
+  if (!m.includes("not allowed")) {
+    return message;
+  }
+  return `${message} — In Hygraph: Project settings → API Access → Permanent Auth Tokens → open your token → ensure “Content API” read access and permission to query the PUBLISHED stage (and all models this app uses). If the token’s default stage is DRAFT, add read access for PUBLISHED or use a dedicated production token.`;
 }
 
 export async function hygraphFetch<T>(
@@ -30,15 +49,24 @@ export async function hygraphFetch<T>(
   const { isEnabled: isDraft } = await draftMode();
   const token = resolveToken(isDraft);
 
+  if (!token) {
+    return {
+      errors: [
+        {
+          message:
+            "No Hygraph token configured. Set HYGRAPH_PRODUCTION (published) and/or HYGRAPH_PREVIEW_TOKEN (draft preview), or HYGRAPH_API_TOKEN as a single read token.",
+        },
+      ],
+    };
+  }
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    // Same queries for prod/preview; stage is controlled by header + token permissions.
-    "gcms-stage": isDraft ? "DRAFT" : "PUBLISHED",
+    Authorization: `Bearer ${token}`,
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  // Rely on gcms-stage so prod vs preview matches the app; PAT must allow that stage.
+  headers["gcms-stage"] = isDraft ? "DRAFT" : "PUBLISHED";
 
   try {
     const res = await fetch(endpoint, {
@@ -53,16 +81,17 @@ export async function hygraphFetch<T>(
     const json = (await res.json()) as HygraphResponse<T>;
 
     if (!res.ok) {
-      const msg =
+      const raw =
         "errors" in json && Array.isArray(json.errors) && json.errors[0]?.message
           ? json.errors[0].message
           : `Hygraph HTTP ${res.status}: ${JSON.stringify(json)}`;
-      return { errors: [{ message: msg }] };
+      return { errors: [{ message: notAllowedHint(raw) }] };
     }
 
     if ("errors" in json && json.errors?.length && json.data == null) {
+      const first = json.errors[0]?.message ?? "GraphQL error";
       return {
-        errors: json.errors,
+        errors: [{ message: notAllowedHint(first) }],
       };
     }
 
