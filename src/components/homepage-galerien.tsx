@@ -27,23 +27,23 @@ function LogoCell({ eintrag }: { eintrag: GalerieEintrag }) {
   const showLink = href && href !== "#";
 
   const inner = (
-    <div className="flex h-20 w-full min-w-[7rem] flex-col items-center justify-center rounded-xl border border-[var(--brand-primary)]/10 bg-white px-3 py-2 shadow-sm transition hover:border-[var(--brand-accent)]/40 hover:shadow-md sm:h-24 sm:min-w-[8.5rem]">
+    <div className="flex h-[15rem] w-full min-w-[21rem] flex-col items-center justify-center rounded-xl border border-[var(--brand-primary)]/10 bg-white px-4 py-3 shadow-sm transition hover:border-[var(--brand-accent)]/40 hover:shadow-md sm:h-[18rem] sm:min-w-[25.5rem]">
       {img?.url ? (
-        <div className="relative h-12 w-full sm:h-14">
+        <div className="relative h-36 w-full sm:h-[10.5rem]">
           <Image
             src={img.url}
             alt={eintrag.bezeichnung}
             fill
             className="object-contain"
-            sizes="(max-width: 640px) 28vw, 140px"
+            sizes="(max-width: 640px) 85vw, 420px"
           />
         </div>
       ) : (
-        <span className="text-center text-xs font-medium text-[var(--brand-ink-muted)]">
+        <span className="text-center text-sm font-medium text-[var(--brand-ink-muted)] sm:text-base">
           {eintrag.bezeichnung}
         </span>
       )}
-      <span className="mt-1 line-clamp-1 text-center text-[10px] font-medium text-[var(--brand-ink-muted)] sm:text-xs">
+      <span className="mt-2 line-clamp-1 text-center text-xs font-medium text-[var(--brand-ink-muted)] sm:text-sm">
         {eintrag.bezeichnung}
       </span>
     </div>
