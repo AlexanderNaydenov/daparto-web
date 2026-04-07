@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 const HygraphPreviewNextjs = dynamic(
   () =>
@@ -15,13 +15,21 @@ function normalizeStudioUrl(url: string): string {
 
 /**
  * Hygraph Preview SDK: click-to-edit overlays + save → refresh.
+ * We use a full document reload on save instead of router.refresh(): in the Studio
+ * sidebar iframe, router.refresh() often does not refetch RSC/fetch the same way a
+ * new tab does, so draft content stayed stale until a full navigation.
  * @see https://hygraph.com/docs/developer-guides/schema/click-to-edit-next-js
  */
 export function PreviewWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const endpoint = process.env.NEXT_PUBLIC_HYGRAPH_ENDPOINT?.trim();
   const studioRaw = process.env.NEXT_PUBLIC_HYGRAPH_STUDIO_URL?.trim();
   const studioUrl = normalizeStudioUrl(studioRaw || "https://app.hygraph.com");
+
+  const hardRefresh = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  }, []);
 
   if (!endpoint) {
     return <>{children}</>;
@@ -31,10 +39,10 @@ export function PreviewWrapper({ children }: { children: React.ReactNode }) {
     <HygraphPreviewNextjs
       endpoint={endpoint}
       studioUrl={studioUrl}
-      refresh={() => router.refresh()}
+      refresh={hardRefresh}
       debug={process.env.NODE_ENV === "development"}
       mode="auto"
-      sync={{ fieldFocus: true, fieldUpdate: false }}
+      sync={{ fieldFocus: true, fieldUpdate: true }}
       overlay={{
         style: { borderColor: "var(--brand-orange)", borderWidth: "2px" },
         button: { backgroundColor: "var(--brand-orange)", color: "white" },
