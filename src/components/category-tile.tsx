@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 
 export type CategoryTileData = {
@@ -8,12 +10,12 @@ export type CategoryTileData = {
   kurzbeschreibung?: string | null;
 };
 
-export function CategoryTile({ category }: { category: CategoryTileData }) {
+export function CategoryTile({ category, locale }: { category: CategoryTileData; locale: AppLocale }) {
   const nameAttrs = previewEntryField(category.id, "name");
   const kurzAttrs = previewEntryField(category.id, "kurzbeschreibung");
   return (
     <Link
-      href={`/kategorie/${category.urlSlug}`}
+      href={withLocale(locale, `/kategorie/${category.urlSlug}`)}
       className="group flex flex-col rounded-2xl border border-black/5 bg-white p-5 shadow-sm transition hover:border-[var(--brand-orange)]/40 hover:shadow-md"
     >
       <span

@@ -1,8 +1,11 @@
 import { CategoryTile } from "@/components/category-tile";
 import { CmsErrorBanner } from "@/components/cms-error-banner";
+import { isAppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { KATEGORIEN_LIST } from "@/lib/queries";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const revalidate = 60;
 
@@ -21,15 +24,21 @@ export const metadata: Metadata = {
 };
 
 export default async function KategorienPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { locale: raw } = await params;
+  if (!isAppLocale(raw)) notFound();
+  const locale = raw;
+
   const sp = await searchParams;
   const qRaw = sp.q;
   const q = typeof qRaw === "string" ? qRaw.trim().toLowerCase() : "";
 
-  const res = await hygraphFetch<Data>(KATEGORIEN_LIST);
+  const res = await hygraphFetch<Data>(KATEGORIEN_LIST, {}, { locale });
 
   if (res.errors?.length) {
     return <CmsErrorBanner message={res.errors[0]?.message ?? "Fehler"} />;
@@ -59,14 +68,14 @@ export default async function KategorienPage({
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((c) => (
-          <CategoryTile key={c.id} category={c} />
+          <CategoryTile key={c.id} category={c} locale={locale} />
         ))}
       </div>
 
       {filtered.length === 0 ? (
         <p className="mt-12 text-center text-[var(--brand-ink-muted)]">
           Keine Kategorie gefunden.{" "}
-          <a className="font-semibold text-[var(--brand-orange)]" href="/kategorien">
+          <a className="font-semibold text-[var(--brand-orange)]" href={withLocale(locale, "/kategorien")}>
             Filter zurücksetzen
           </a>
         </p>

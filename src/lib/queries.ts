@@ -1,6 +1,6 @@
 export const BANNER_QUERY = /* GraphQL */ `
-  query Banner {
-    banners(where: { aktiv: true }, first: 1, orderBy: updatedAt_DESC) {
+  query Banner($locales: [Locale!]!) {
+    banners(where: { aktiv: true }, first: 1, orderBy: updatedAt_DESC, locales: $locales) {
       id
       text
       linkLabel
@@ -10,8 +10,8 @@ export const BANNER_QUERY = /* GraphQL */ `
 `;
 
 export const HOME_PAGE_QUERY = /* GraphQL */ `
-  query HomePage {
-    startseiten(first: 1, orderBy: updatedAt_DESC) {
+  query HomePage($locales: [Locale!]!) {
+    startseiten(locales: $locales, first: 1, orderBy: updatedAt_DESC) {
       id
       titel
       urlSlug
@@ -126,13 +126,13 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
         }
       }
     }
-    kategorien(first: 24, orderBy: name_ASC) {
+    kategorien(locales: $locales, first: 24, orderBy: name_ASC) {
       id
       name
       urlSlug
       kurzbeschreibung
     }
-    produkte(first: 12, orderBy: updatedAt_DESC) {
+    produkte(locales: $locales, first: 12, orderBy: updatedAt_DESC) {
       id
       titel
       urlSlug
@@ -155,8 +155,8 @@ export const HOME_PAGE_QUERY = /* GraphQL */ `
 `;
 
 export const CATEGORY_BY_SLUG = /* GraphQL */ `
-  query KategorieBySlug($slug: String!) {
-    kategorien(where: { urlSlug: $slug }, first: 1) {
+  query KategorieBySlug($slug: String!, $locales: [Locale!]!) {
+    kategorien(where: { urlSlug: $slug }, locales: $locales, first: 1) {
       id
       name
       urlSlug
@@ -168,6 +168,7 @@ export const CATEGORY_BY_SLUG = /* GraphQL */ `
     }
     produkte(
       where: { kategorie: { urlSlug: $slug } }
+      locales: $locales
       first: 48
       orderBy: titel_ASC
     ) {
@@ -188,8 +189,8 @@ export const CATEGORY_BY_SLUG = /* GraphQL */ `
 `;
 
 export const PRODUCT_BY_SLUG = /* GraphQL */ `
-  query ProduktBySlug($slug: String!) {
-    produkte(where: { urlSlug: $slug }, first: 1) {
+  query ProduktBySlug($slug: String!, $locales: [Locale!]!) {
+    produkte(where: { urlSlug: $slug }, locales: $locales, first: 1) {
       id
       titel
       urlSlug
@@ -233,8 +234,8 @@ export const PRODUCT_BY_SLUG = /* GraphQL */ `
 `;
 
 export const KATEGORIEN_LIST = /* GraphQL */ `
-  query KategorienList {
-    kategorien(first: 100, orderBy: name_ASC) {
+  query KategorienList($locales: [Locale!]!) {
+    kategorien(locales: $locales, first: 100, orderBy: name_ASC) {
       id
       name
       urlSlug
@@ -244,8 +245,8 @@ export const KATEGORIEN_LIST = /* GraphQL */ `
 `;
 
 export const RATGEBER_LIST = /* GraphQL */ `
-  query Ratgeber {
-    ratgeberArtikelbeitraege(first: 50, orderBy: updatedAt_DESC) {
+  query Ratgeber($locales: [Locale!]!) {
+    ratgeberArtikelbeitraege(locales: $locales, first: 50, orderBy: updatedAt_DESC) {
       id
       titel
       urlSlug
@@ -255,8 +256,8 @@ export const RATGEBER_LIST = /* GraphQL */ `
 `;
 
 export const RATGEBER_BY_SLUG = /* GraphQL */ `
-  query RatgeberArtikel($slug: String!) {
-    ratgeberArtikelbeitraege(where: { urlSlug: $slug }, first: 1) {
+  query RatgeberArtikel($slug: String!, $locales: [Locale!]!) {
+    ratgeberArtikelbeitraege(where: { urlSlug: $slug }, locales: $locales, first: 1) {
       id
       titel
       urlSlug

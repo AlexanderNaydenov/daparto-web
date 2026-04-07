@@ -1,5 +1,6 @@
 import { hygraphFetch } from "@/lib/hygraph";
 import { BANNER_QUERY } from "@/lib/queries";
+import type { AppLocale } from "@/i18n/config";
 import Link from "next/link";
 
 type BannerData = {
@@ -11,8 +12,8 @@ type BannerData = {
   }[];
 };
 
-export async function SiteTopBanner() {
-  const res = await hygraphFetch<BannerData>(BANNER_QUERY);
+export async function SiteTopBanner({ locale }: { locale: AppLocale }) {
+  const res = await hygraphFetch<BannerData>(BANNER_QUERY, {}, { locale });
   const banner = res.data?.banners?.[0];
   if (res.errors?.length || !banner?.text) {
     return null;

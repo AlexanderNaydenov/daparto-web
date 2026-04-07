@@ -1,4 +1,6 @@
 import { CmsErrorBanner } from "@/components/cms-error-banner";
+import { isAppLocale, defaultLocale, type AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 import { PRODUCT_BY_SLUG } from "@/lib/queries";
@@ -33,10 +35,11 @@ type Data = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const res = await hygraphFetch<Data>(PRODUCT_BY_SLUG, { slug });
+  const { slug, locale: raw } = await params;
+  const locale: AppLocale = isAppLocale(raw) ? raw : defaultLocale;
+  const res = await hygraphFetch<Data>(PRODUCT_BY_SLUG, { slug }, { locale });
   const p = res.data?.produkte?.[0];
   return {
     title: p?.seo?.metaTitel ?? p?.titel,
@@ -47,10 +50,13 @@ export async function generateMetadata({
 export default async function ProduktPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const res = await hygraphFetch<Data>(PRODUCT_BY_SLUG, { slug });
+  const { slug, locale: raw } = await params;
+  if (!isAppLocale(raw)) notFound();
+  const locale = raw;
+
+  const res = await hygraphFetch<Data>(PRODUCT_BY_SLUG, { slug }, { locale });
 
   if (res.errors?.length) {
     return <CmsErrorBanner message={res.errors[0]?.message ?? "Fehler"} />;
@@ -69,18 +75,18 @@ export default async function ProduktPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <nav className="text-sm text-[var(--brand-ink-muted)]">
-        <Link href="/" className="hover:text-[var(--brand-orange)]">
+        <Link href={withLocale(locale, "/")} className="hover:text-[var(--brand-orange)]">
           Start
         </Link>
         <span className="mx-2">/</span>
-        <Link href="/kategorien" className="hover:text-[var(--brand-orange)]">
+        <Link href={withLocale(locale, "/kategorien")} className="hover:text-[var(--brand-orange)]">
           Kategorien
         </Link>
         {p.kategorie ? (
           <>
             <span className="mx-2">/</span>
             <Link
-              href={`/kategorie/${p.kategorie.urlSlug}`}
+              href={withLocale(locale, `/kategorie/${p.kategorie.urlSlug}`)}
               className="hover:text-[var(--brand-orange)]"
             >
               {p.kategorie.name}

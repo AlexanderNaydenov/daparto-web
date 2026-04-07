@@ -1,5 +1,7 @@
 import { draftMode } from "next/headers";
 import Link from "next/link";
+import { defaultLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 
 export async function DraftModeBanner() {
   const { isEnabled } = await draftMode();
@@ -13,7 +15,7 @@ export async function DraftModeBanner() {
       <span className="mx-2 text-amber-800/80">—</span>
       <span className="text-amber-900">Sie sehen unveröffentlichte Inhalte aus Hygraph.</span>
       <Link
-        href="/api/draft/disable?redirect=/"
+        href={`/api/draft/disable?redirect=${encodeURIComponent(withLocale(defaultLocale, "/"))}`}
         className="ml-3 font-semibold text-amber-900 underline decoration-amber-700 underline-offset-2 hover:text-amber-950"
       >
         Vorschau beenden

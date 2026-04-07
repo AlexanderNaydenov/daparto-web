@@ -1,10 +1,13 @@
 "use client";
 
+import type { AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { VehicleSelectionBox } from "./vehicle-selection-box";
 
 type Props = {
+  locale: AppLocale;
   title: string;
   subtitle?: string | null;
   primaryCta?: { label: string; href: string } | null;
@@ -15,6 +18,7 @@ type Props = {
 };
 
 export function SearchHero({
+  locale,
   title,
   subtitle,
   primaryCta,
@@ -28,10 +32,11 @@ export function SearchHero({
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = q.trim();
+    const base = withLocale(locale, "/kategorien");
     if (trimmed) {
-      router.push(`/kategorien?q=${encodeURIComponent(trimmed)}`);
+      router.push(`${base}?q=${encodeURIComponent(trimmed)}`);
     } else {
-      router.push("/kategorien");
+      router.push(base);
     }
   }
 

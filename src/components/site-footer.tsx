@@ -1,13 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 
-export function SiteFooter() {
+export function SiteFooter({ locale }: { locale: AppLocale }) {
+  const home = withLocale(locale, "/");
   return (
     <footer className="mt-auto border-t border-black/5 bg-[var(--brand-surface)]">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="inline-block">
+            <Link href={home} className="inline-block">
               <Image
                 src="/daparto-logo.svg"
                 alt="Daparto"
@@ -25,12 +28,12 @@ export function SiteFooter() {
             <p className="text-sm font-semibold text-[var(--brand-ink)]">Entdecken</p>
             <ul className="mt-3 space-y-2 text-sm text-[var(--brand-ink-muted)]">
               <li>
-                <Link className="hover:text-[var(--brand-primary)]" href="/kategorien">
+                <Link className="hover:text-[var(--brand-primary)]" href={withLocale(locale, "/kategorien")}>
                   Kategorien
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[var(--brand-primary)]" href="/ratgeber">
+                <Link className="hover:text-[var(--brand-primary)]" href={withLocale(locale, "/ratgeber")}>
                   Ratgeber
                 </Link>
               </li>

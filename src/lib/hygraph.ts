@@ -1,4 +1,5 @@
 import { draftMode } from "next/headers";
+import { defaultLocale, graphLocalesForUi, type AppLocale } from "@/i18n/config";
 
 export const HYGRAPH_CACHE_TAG = "hygraph";
 
@@ -34,11 +35,27 @@ function notAllowedHint(message: string): string {
   return `${message} — In Hygraph: Project settings → API Access → Permanent Auth Tokens → open your token → ensure “Content API” read access and permission to query the PUBLISHED stage (and all models this app uses). If the token’s default stage is DRAFT, add read access for PUBLISHED or use a dedicated production token.`;
 }
 
+export type HygraphFetchOptions = {
+  revalidateSeconds?: number;
+  /** UI locale; forwarded as GraphQL `locales` with fallback (de↔en). */
+  locale?: AppLocale;
+};
+
 export async function hygraphFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
-  revalidateSeconds: number = DEFAULT_REVALIDATE
+  revalidateSecondsOrOptions: number | HygraphFetchOptions = DEFAULT_REVALIDATE
 ): Promise<HygraphResponse<T>> {
+  const options: HygraphFetchOptions =
+    typeof revalidateSecondsOrOptions === "number"
+      ? { revalidateSeconds: revalidateSecondsOrOptions }
+      : revalidateSecondsOrOptions;
+  const revalidateSeconds = options.revalidateSeconds ?? DEFAULT_REVALIDATE;
+  const locale = options.locale ?? defaultLocale;
+  const mergedVariables = {
+    ...(variables ?? {}),
+    locales: graphLocalesForUi(locale),
+  };
   const endpoint = process.env.HYGRAPH_ENDPOINT;
   if (!endpoint) {
     return {
@@ -72,7 +89,7 @@ export async function hygraphFetch<T>(
     const res = await fetch(endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify({ query, variables }),
+      body: JSON.stringify({ query, variables: mergedVariables }),
       ...(isDraft
         ? { cache: "no-store" }
         : { next: { revalidate: revalidateSeconds, tags: [HYGRAPH_CACHE_TAG] } }),

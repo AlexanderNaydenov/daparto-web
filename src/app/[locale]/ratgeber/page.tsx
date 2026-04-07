@@ -1,8 +1,11 @@
 import { CmsErrorBanner } from "@/components/cms-error-banner";
+import { isAppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { RATGEBER_LIST } from "@/lib/queries";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export const revalidate = 60;
 
@@ -20,8 +23,12 @@ export const metadata: Metadata = {
   description: "Tipps rund um Ersatzteile, Wartung und Kompatibilität.",
 };
 
-export default async function RatgeberPage() {
-  const res = await hygraphFetch<Data>(RATGEBER_LIST);
+export default async function RatgeberPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isAppLocale(raw)) notFound();
+  const locale = raw;
+
+  const res = await hygraphFetch<Data>(RATGEBER_LIST, {}, { locale });
 
   if (res.errors?.length) {
     return <CmsErrorBanner message={res.errors[0]?.message ?? "Fehler"} />;
@@ -42,7 +49,7 @@ export default async function RatgeberPage() {
         {items.map((a) => (
           <li key={a.id}>
             <Link
-              href={`/ratgeber/${a.urlSlug}`}
+              href={withLocale(locale, `/ratgeber/${a.urlSlug}`)}
               className="flex flex-col gap-1 px-5 py-5 transition hover:bg-[var(--brand-surface)] sm:flex-row sm:items-center sm:justify-between"
             >
               <span className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[var(--brand-ink)]">

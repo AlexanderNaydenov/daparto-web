@@ -4,10 +4,13 @@ import { HomepageGalerien, type GalerieRow } from "@/components/homepage-galerie
 import { ModularSections } from "@/components/modular-sections";
 import { ProductCard } from "@/components/product-card";
 import { SearchHero } from "@/components/search-hero";
+import { isAppLocale, defaultLocale, type AppLocale } from "@/i18n/config";
+import { resolveCmsHref, withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { previewModularField } from "@/lib/hygraph-preview-attrs";
 import { HOME_PAGE_QUERY } from "@/lib/queries";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const revalidate = 60;
 
@@ -38,8 +41,18 @@ type HomeData = {
   produkte: import("@/components/product-card").ProductCardData[];
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const res = await hygraphFetch<Pick<HomeData, "startseiten">>(HOME_PAGE_QUERY);
+export function generateStaticParams() {
+  return [{ locale: "de" }, { locale: "en" }];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: AppLocale = isAppLocale(raw) ? raw : defaultLocale;
+  const res = await hygraphFetch<Pick<HomeData, "startseiten">>(HOME_PAGE_QUERY, {}, { locale });
   const s = res.data?.startseiten?.[0];
   const seo = s?.seo;
   return {
@@ -48,14 +61,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Home() {
-  const res = await hygraphFetch<HomeData>(HOME_PAGE_QUERY);
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: raw } = await params;
+  if (!isAppLocale(raw)) notFound();
+  const locale = raw;
+
+  const res = await hygraphFetch<HomeData>(HOME_PAGE_QUERY, {}, { locale });
 
   if (res.errors?.length) {
     return (
       <>
         <CmsErrorBanner message={res.errors[0]?.message ?? "Unbekannter Fehler"} />
         <SearchHero
+          locale={locale}
           title="Ersatzteile vergleichen"
           subtitle="Verbinden Sie dieses Frontend mit Hygraph und konfigurieren Sie die Umgebungsvariablen."
         />
@@ -75,6 +93,7 @@ export default async function Home() {
   return (
     <>
       <SearchHero
+        locale={locale}
         title={held?.heldTitel ?? siteTitle}
         subtitle={
           held?.untertitel ??
@@ -86,17 +105,17 @@ export default async function Home() {
           held?.primaererAufruf
             ? {
                 label: held.primaererAufruf.buttonBeschriftung,
-                href: held.primaererAufruf.zielUrl,
+                href: resolveCmsHref(locale, held.primaererAufruf.zielUrl),
               }
-            : { label: "Kategorien", href: "/kategorien" }
+            : { label: "Kategorien", href: withLocale(locale, "/kategorien") }
         }
         secondaryCta={
           held?.sekundaererAufruf
             ? {
                 label: held.sekundaererAufruf.buttonBeschriftung,
-                href: held.sekundaererAufruf.zielUrl,
+                href: resolveCmsHref(locale, held.sekundaererAufruf.zielUrl),
               }
-            : { label: "Ratgeber", href: "/ratgeber" }
+            : { label: "Ratgeber", href: withLocale(locale, "/ratgeber") }
         }
       />
 
@@ -115,7 +134,7 @@ export default async function Home() {
             </p>
           </div>
           <a
-            href="/kategorien"
+            href={withLocale(locale, "/kategorien")}
             className="text-sm font-semibold text-[var(--brand-orange)] hover:underline"
           >
             Alle Kategorien
@@ -123,7 +142,7 @@ export default async function Home() {
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {(res.data?.kategorien ?? []).map((c) => (
-            <CategoryTile key={c.id} category={c} />
+            <CategoryTile key={c.id} category={c} locale={locale} />
           ))}
         </div>
       </section>
@@ -140,7 +159,7 @@ export default async function Home() {
               </p>
             </div>
             <a
-              href="/kategorien"
+              href={withLocale(locale, "/kategorien")}
               className="text-sm font-semibold text-[var(--brand-orange)] hover:underline"
             >
               Mehr entdecken
@@ -148,7 +167,7 @@ export default async function Home() {
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {(res.data?.produkte ?? []).map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} locale={locale} />
             ))}
           </div>
         </div>

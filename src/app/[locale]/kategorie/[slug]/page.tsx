@@ -1,5 +1,7 @@
 import { ProductCard } from "@/components/product-card";
 import { CmsErrorBanner } from "@/components/cms-error-banner";
+import { isAppLocale, defaultLocale, type AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { CATEGORY_BY_SLUG } from "@/lib/queries";
 import type { Metadata } from "next";
@@ -22,10 +24,11 @@ type Data = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const res = await hygraphFetch<Data>(CATEGORY_BY_SLUG, { slug });
+  const { slug, locale: raw } = await params;
+  const locale: AppLocale = isAppLocale(raw) ? raw : defaultLocale;
+  const res = await hygraphFetch<Data>(CATEGORY_BY_SLUG, { slug }, { locale });
   const k = res.data?.kategorien?.[0];
   return {
     title: k?.name ?? "Kategorie",
@@ -36,10 +39,13 @@ export async function generateMetadata({
 export default async function KategoriePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const res = await hygraphFetch<Data>(CATEGORY_BY_SLUG, { slug });
+  const { slug, locale: raw } = await params;
+  if (!isAppLocale(raw)) notFound();
+  const locale = raw;
+
+  const res = await hygraphFetch<Data>(CATEGORY_BY_SLUG, { slug }, { locale });
 
   if (res.errors?.length) {
     return <CmsErrorBanner message={res.errors[0]?.message ?? "Fehler"} />;
@@ -53,11 +59,11 @@ export default async function KategoriePage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <nav className="text-sm text-[var(--brand-ink-muted)]">
-        <Link href="/" className="hover:text-[var(--brand-orange)]">
+        <Link href={withLocale(locale, "/")} className="hover:text-[var(--brand-orange)]">
           Start
         </Link>
         <span className="mx-2">/</span>
-        <Link href="/kategorien" className="hover:text-[var(--brand-orange)]">
+        <Link href={withLocale(locale, "/kategorien")} className="hover:text-[var(--brand-orange)]">
           Kategorien
         </Link>
         <span className="mx-2">/</span>
@@ -84,7 +90,7 @@ export default async function KategoriePage({
       </h2>
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {(res.data?.produkte ?? []).map((p) => (
-          <ProductCard key={p.id} product={p} />
+          <ProductCard key={p.id} product={p} locale={locale} />
         ))}
       </div>
 

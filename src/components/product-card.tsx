@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { AppLocale } from "@/i18n/config";
+import { withLocale } from "@/i18n/navigation";
 import { previewEntryField } from "@/lib/hygraph-preview-attrs";
 
 export type ProductCardData = {
@@ -13,13 +15,13 @@ export type ProductCardData = {
   kategorie?: { name: string; urlSlug: string } | null;
 };
 
-export function ProductCard({ product }: { product: ProductCardData }) {
+export function ProductCard({ product, locale }: { product: ProductCardData; locale: AppLocale }) {
   const img = product.produktbilder?.[0];
   const titelAttrs = previewEntryField(product.id, "titel");
   const kurzAttrs = previewEntryField(product.id, "kurzbeschreibung");
   return (
     <Link
-      href={`/produkt/${product.urlSlug}`}
+      href={withLocale(locale, `/produkt/${product.urlSlug}`)}
       className="group flex flex-col overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition hover:border-[var(--brand-orange)]/35 hover:shadow-md"
     >
       <div className="relative aspect-[4/3] bg-neutral-100">
