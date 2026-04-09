@@ -5,9 +5,12 @@ import { redirect } from "next/navigation";
  * Enables Next.js Draft Mode and Hygraph live preview (DRAFT stage + preview token).
  *
  * Configure in Hygraph Studio → Schema → model → Sidebar → Preview:
+ * - API routes are always `/api/...` (not `/de/api/...`). A rewrite also maps
+ *   `/:locale(de|en)/api/*` → `/api/*` so mistaken links still work.
  * - Startseite: `https://your-domain.com/api/draft?secret=YOUR_SECRET&redirect=/de`
- * - Ratgeber-Artikel (use the entry’s `urlSlug` field; app default locale is `de`):
- *   `https://your-domain.com/api/draft?secret=YOUR_SECRET&redirect=/de/ratgeber/{{ urlSlug }}`
+ * - Ratgeber-Artikel: redirect must include locale + `/ratgeber/` + slug, e.g. English (Hygraph default):
+ *   `https://your-domain.com/api/draft?secret=YOUR_SECRET&redirect=/en/ratgeber/{{ urlSlug }}`
+ *   German: `...&redirect=/de/ratgeber/{{ urlSlug }}`
  *
  * Requires `HYGRAPH_PREVIEW_SECRET` (or `PREVIEW_SECRET`) and `NEXT_PUBLIC_HYGRAPH_*` for the Preview SDK.
  *

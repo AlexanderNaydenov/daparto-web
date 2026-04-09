@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Hygraph / bookmarks often use /de/api/draft — API routes live at /api/* only.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/:locale(de|en)/api/:path*", destination: "/api/:path*" },
+      ],
+    };
+  },
   images: {
     remotePatterns: [
       {
