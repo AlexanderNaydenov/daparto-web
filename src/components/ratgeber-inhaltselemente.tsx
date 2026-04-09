@@ -78,7 +78,7 @@ export function RatgeberInhaltselemente({
       {sections.map((block, i) => {
         switch (block.__typename) {
           case "BildMitText": {
-            const title = block.ueberschrift as string | undefined;
+            const title = block.bmtUeberschrift as string | undefined;
             const align = block.bildAusrichtung as string | undefined;
             const fliessText = block.fliessText as RichSlice | undefined;
             const img = block.abbildung as
@@ -130,7 +130,7 @@ export function RatgeberInhaltselemente({
             );
           }
           case "KennzahlenLeiste": {
-            const title = block.ueberschrift as string | undefined;
+            const title = block.kennUeberschrift as string | undefined;
             const stats =
               (block.kennzahlen as {
                 id?: string;

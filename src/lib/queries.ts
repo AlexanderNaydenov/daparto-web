@@ -297,7 +297,7 @@ export const RATGEBER_BY_SLUG = /* GraphQL */ `
         __typename
         ... on BildMitText {
           id
-          ueberschrift
+          bmtUeberschrift: ueberschrift
           bildAusrichtung
           abbildung {
             url
@@ -312,7 +312,7 @@ export const RATGEBER_BY_SLUG = /* GraphQL */ `
         }
         ... on KennzahlenLeiste {
           id
-          ueberschrift
+          kennUeberschrift: ueberschrift
           kennzahlen {
             id
             zahlText
