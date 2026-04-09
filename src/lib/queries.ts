@@ -251,6 +251,16 @@ export const RATGEBER_LIST = /* GraphQL */ `
       titel
       urlSlug
       teaser
+      vorschaubild {
+        url
+        width
+        height
+      }
+      themenKategorie {
+        id
+        name
+        urlSlug
+      }
     }
   }
 `;
@@ -263,12 +273,102 @@ export const RATGEBER_BY_SLUG = /* GraphQL */ `
       urlSlug
       teaser
       inhalt {
+        html
         text
         markdown
+      }
+      vorschaubild {
+        url
+        width
+        height
+      }
+      themenKategorie {
+        id
+        name
+        urlSlug
+      }
+      teilekategorie {
+        value
+        path {
+          value
+        }
+      }
+      inhaltselemente {
+        __typename
+        ... on BildMitText {
+          id
+          ueberschrift
+          bildAusrichtung
+          abbildung {
+            url
+            width
+            height
+          }
+          fliessText {
+            html
+            text
+            markdown
+          }
+        }
+        ... on KennzahlenLeiste {
+          id
+          ueberschrift
+          kennzahlen {
+            id
+            zahlText
+            beschreibung
+          }
+        }
+        ... on ZitatBaustein {
+          id
+          zitatText {
+            html
+            text
+            markdown
+          }
+          quellenangabe
+        }
+      }
+      relevanteProdukteUndMarken {
+        __typename
+        ... on Produkt {
+          id
+          titel
+          urlSlug
+          kurzbeschreibung
+          hervorgehoben
+          produktbilder(first: 1) {
+            url
+            width
+            height
+          }
+          marke {
+            name
+          }
+          kategorie {
+            name
+            urlSlug
+          }
+        }
+        ... on Galerie {
+          id
+          titel
+          eintraege {
+            id
+            bezeichnung
+            linkUrl
+            logo {
+              url
+              width
+              height
+            }
+          }
+        }
       }
       seo {
         metaTitel
         metaBeschreibung
+        suchmaschinenSichtbar
       }
     }
   }

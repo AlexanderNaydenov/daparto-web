@@ -4,6 +4,7 @@ import { withLocale } from "@/i18n/navigation";
 import { hygraphFetch } from "@/lib/hygraph";
 import { RATGEBER_LIST } from "@/lib/queries";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -15,6 +16,8 @@ type Data = {
     titel: string;
     urlSlug: string;
     teaser?: string | null;
+    vorschaubild?: { url: string; width?: number | null; height?: number | null } | null;
+    themenKategorie?: { name: string; urlSlug: string } | null;
   }[];
 };
 
@@ -50,15 +53,35 @@ export default async function RatgeberPage({ params }: { params: Promise<{ local
           <li key={a.id}>
             <Link
               href={withLocale(locale, `/ratgeber/${a.urlSlug}`)}
-              className="flex flex-col gap-1 px-5 py-5 transition hover:bg-[var(--brand-surface)] sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 px-5 py-5 transition hover:bg-[var(--brand-surface)] sm:flex-row sm:items-center sm:gap-6"
             >
-              <span className="font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[var(--brand-ink)]">
-                {a.titel}
-              </span>
-              {a.teaser ? (
-                <span className="max-w-xl text-sm text-[var(--brand-ink-muted)]">{a.teaser}</span>
+              {a.vorschaubild?.url ? (
+                <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-20 sm:w-32">
+                  <Image
+                    src={a.vorschaubild.url}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                  />
+                </div>
               ) : null}
-              <span className="text-sm font-semibold text-[var(--brand-orange)]">Lesen →</span>
+              <div className="min-w-0 flex-1">
+                {a.themenKategorie ? (
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[var(--brand-orange)]">
+                    {a.themenKategorie.name}
+                  </span>
+                ) : null}
+                <span className="mt-0.5 block font-[family-name:var(--font-barlow-condensed)] text-xl font-bold text-[var(--brand-ink)]">
+                  {a.titel}
+                </span>
+                {a.teaser ? (
+                  <span className="mt-1 block max-w-xl text-sm text-[var(--brand-ink-muted)]">{a.teaser}</span>
+                ) : null}
+              </div>
+              <span className="shrink-0 text-sm font-semibold text-[var(--brand-orange)] sm:self-center">
+                Lesen →
+              </span>
             </Link>
           </li>
         ))}

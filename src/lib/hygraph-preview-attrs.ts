@@ -65,3 +65,38 @@ export function previewEntryField(entryId: string, fieldApiId: string): PreviewD
     })
   );
 }
+
+/** Ratgeber-Artikel: field `inhaltselemente` + one component block (BildMitText, KennzahlenLeiste, ZitatBaustein). */
+export function previewRatgeberBlockField(
+  ratgeberArtikelId: string,
+  blockInstanceId: string,
+  fieldApiId: string
+): PreviewDataAttrs {
+  return attrs(
+    createPreviewAttributes({
+      entryId: ratgeberArtikelId,
+      fieldApiId,
+      componentChain: [createComponentChainLink("inhaltselemente", blockInstanceId)],
+    })
+  );
+}
+
+/** Nested under a Ratgeber block (e.g. Kennzahlen row). */
+export function previewRatgeberNestedField(
+  ratgeberArtikelId: string,
+  blockInstanceId: string,
+  childFieldApiId: string,
+  childInstanceId: string,
+  leafFieldApiId: string
+): PreviewDataAttrs {
+  return attrs(
+    createPreviewAttributes({
+      entryId: ratgeberArtikelId,
+      fieldApiId: leafFieldApiId,
+      componentChain: [
+        createComponentChainLink("inhaltselemente", blockInstanceId),
+        createComponentChainLink(childFieldApiId, childInstanceId),
+      ],
+    })
+  );
+}
